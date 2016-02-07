@@ -1,0 +1,13 @@
+{ "variables": [
+	{
+		"name": "Oxygen content",
+		"description": "Amount of oxygen present in the atmosphere. Affects the type and abundance of life.",
+		"default": "20"
+	},
+
+	{
+		"name": "Moon size",
+		"description": "Affects tide strength, which is crucial for the primitive forms of life.",
+		"default": "50"
+	}
+]}

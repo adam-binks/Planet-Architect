@@ -1,0 +1,24 @@
+{ "events":[
+	{
+		"name": "Land hydrate",
+		"description": "The seas flood, spreading nutrient rich biomass",
+		"criteria": [
+			{
+			"criteriaVariable": "Moon size",
+			"criteriaNumber": "80",
+			"criteriaType": "AtMost"
+			},
+			{
+			"criteriaVariable": "Oxygen content",
+			"criteriaNumber": "15",
+			"criteriaType": "AtLeast"
+			}
+		],
+		"variableEffects": [
+			{
+			"effectVariable": "Oxygen content",
+			"variableChangeAmount": "20"
+			}
+		]
+	}
+]}
