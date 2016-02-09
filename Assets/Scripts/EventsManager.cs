@@ -2,6 +2,7 @@
 using LitJson;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlanetEvent
 {
@@ -11,6 +12,29 @@ public class PlanetEvent
     public VariableEffect[] variableEffects;
     public SpeciesEffect[] speciesEffects;
 
+    public bool CheckIfCriteriaFulfilled(Dictionary<string, GameVariable> variables)
+    {
+        foreach(EventCriteria theCriteria in criteria)
+        {
+            if (!theCriteria.Check(variables))
+            {
+                return false; // if any one criteria has not been met, return false
+            }
+        }
+        // all criteria are met: trigger the event
+        Debug.Log(string.Format("Event triggered: {0}", name));
+        FireVariableEffects(variables);
+        return true;
+    }
+
+    private void FireVariableEffects(Dictionary<string, GameVariable> variables)
+    {
+        foreach (VariableEffect effect in variableEffects)
+        {
+            effect.Fire(variables);
+        }
+    }
+
 }
 
 public enum CriteriaType { AtLeast, AtMost, Exactly, Roughly };
@@ -19,12 +43,45 @@ public class EventCriteria
     public CriteriaType criteriaType;
     public string criteriaVariable;
     public int criteriaNumber;
+
+    private int roughVariableLenience = 5;
+
+    /// <summary>
+    /// Check if this criteria has been met
+    /// </summary>
+    public bool Check(Dictionary<string, GameVariable> variables)
+    {
+        switch (criteriaType)
+        {
+            case CriteriaType.AtLeast:
+                return variables[criteriaVariable].value >= criteriaNumber;
+            case CriteriaType.AtMost:
+                return variables[criteriaVariable].value <= criteriaNumber;
+            case CriteriaType.Exactly:
+                return variables[criteriaVariable].value == criteriaNumber;
+            case CriteriaType.Roughly: // return true if value is within roughVariableLenience of criteriaNumber
+                return variables[criteriaVariable].value <= criteriaNumber + roughVariableLenience &&
+                       variables[criteriaVariable].value >= criteriaNumber - roughVariableLenience;
+            default:
+                break;
+        }
+        Debug.LogError("Invalid CriteriaType for variable " + criteriaVariable);
+        return false;
+    }
 }
 
 public class VariableEffect
 {
     public string effectVariable;
     public int variableChangeAmount;
+
+    /// <summary>
+    /// Set the effectVariable's value to its previous value + variableChangeAmounts
+    /// </summary>
+    public void Fire(Dictionary<string, GameVariable> variables)
+    {
+        variables[effectVariable].ChangeValue(variables[effectVariable].value + variableChangeAmount);
+    }
 }
 
 public class SpeciesEffect
@@ -38,12 +95,20 @@ public class EventsManager : MonoBehaviour {
 
     public PlanetEvent[] planetEvents;
 
-    public void AddPlanetEvent(string jsonString, int variableNum, int numVariables)
+    private VariablesManager varManager;
+
+
+    void Start()
+    {
+        varManager = GetComponent<VariablesManager>();
+    }
+
+    public void AddPlanetEvent(string jsonString, int eventNum, int numEvents)
     {
         // if this is the first event, initialise the planetEvents array
         if (planetEvents == null)
         {
-            planetEvents = new PlanetEvent[numVariables];
+            planetEvents = new PlanetEvent[numEvents];
         }
 
         // generate a PlanetEvent and its EventCriteria and effects based on this
@@ -66,6 +131,8 @@ public class EventsManager : MonoBehaviour {
         {
             newEvent.variableEffects[i] = GenerateVariableEffect(jsonEvent["variableEffects"][i]);
         }
+
+        planetEvents[eventNum] = newEvent;
 
     }
 
@@ -104,5 +171,18 @@ public class EventsManager : MonoBehaviour {
         newEffect.variableChangeAmount = Convert.ToInt32(jsonData["variableChangeAmount"].ToString());
 
         return newEffect;
+    }
+
+    public void UpdateEvents()
+    {
+        CheckForEventTriggers();
+    }
+
+    void CheckForEventTriggers()
+    {
+        foreach (PlanetEvent pEvent in planetEvents)
+        {
+            pEvent.CheckIfCriteriaFulfilled(varManager.gameVars);
+        }
     }
 }
