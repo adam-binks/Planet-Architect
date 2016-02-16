@@ -13,10 +13,11 @@ public class GameVariable
     public int defaultValue;
     public int value;
     public VariablesManager varManager;
+    public int maxAmount = 100;
 
     public void ChangeValue(int newValue, bool shouldUpdateSlider = true)
     {
-        value = Mathf.Clamp(newValue, 0, 100); // all variables lie between 0 and 100
+        value = Mathf.Clamp(newValue, 0, maxAmount); // most variables lie between 0 and 100 (except year)
 
         if (shouldUpdateSlider) // the variable has been changed by something other than the slider
         {
@@ -53,6 +54,24 @@ public class VariablesManager : MonoBehaviour
         gameVars[newVar.name] = newVar;
 
         AddSlider(newVar);
+    }
+
+    /// <summary>
+    /// Create a blank new variable.
+    /// For special variables like the current year that are not read from variables.txt
+    /// Cannot be the first variable!
+    /// </summary>
+    public GameVariable AddCustomVar(string name, bool addSlider=false)
+    {
+        GameVariable newVar = new GameVariable();
+        newVar.varManager = this; // so the variable can modify sliders etc
+        newVar.name = name;
+        gameVars[newVar.name] = newVar;
+        if (addSlider)
+        {
+            AddSlider(newVar);
+        }
+        return newVar;
     }
 
     /// <summary>

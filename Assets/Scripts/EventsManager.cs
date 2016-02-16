@@ -8,12 +8,25 @@ public class PlanetEvent
 {
     public string name;
     public string description;
+    public int interval; // minimum time between times when event fires. if =-1, only fire once per game
     public EventCriteria[] criteria;
     public VariableEffect[] variableEffects;
     public SpeciesEffect[] speciesEffects;
 
+    private int lastFireYear = 0; // used to calculate when the interval has finished
+
     public bool CheckIfCriteriaFulfilled(Dictionary<string, GameVariable> variables)
     {
+        // check if event is still on cooldown
+        int currentYear = variables["year"].value;
+        if (interval > 0) // interval of 0 means no interval, interval of -1 means only fire once per game
+        {
+            if ((currentYear - lastFireYear) < interval) // event is still on cooldown
+            {
+                return false;
+            }
+        }
+        // check each variable based criteria for the event
         foreach(EventCriteria theCriteria in criteria)
         {
             if (!theCriteria.Check(variables))
@@ -24,6 +37,7 @@ public class PlanetEvent
         // all criteria are met: trigger the event
         Debug.Log(string.Format("Event triggered: {0}", name));
         FireVariableEffects(variables);
+        lastFireYear = currentYear; // start the cooldown "timer"
         return true;
     }
 
@@ -117,6 +131,7 @@ public class EventsManager : MonoBehaviour {
         PlanetEvent newEvent = new PlanetEvent();
         newEvent.name = jsonEvent["name"].ToString();
         newEvent.description = jsonEvent["description"].ToString();
+        newEvent.interval = Convert.ToInt32(jsonEvent["interval"].ToString());
 
         // generate EventCriteria objects
         newEvent.criteria = new EventCriteria[jsonEvent["criteria"].Count];

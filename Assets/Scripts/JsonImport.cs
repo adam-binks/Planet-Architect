@@ -17,7 +17,8 @@ public class JsonImport : MonoBehaviour {
 
         ImportVariables();
         ImportEvents();
-	}
+        GetComponent<TimeManager>().AddYearVariable();
+    }
 
     /// <summary>
     /// Read "Content/variables.txt" json file and create GameVariable objects and sliders for each of them

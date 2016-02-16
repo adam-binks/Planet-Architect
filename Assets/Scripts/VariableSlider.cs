@@ -7,12 +7,10 @@ public class VariableSlider : MonoBehaviour {
     public GameVariable gameVar;
     public Text titleText;
 
-    private VariablesManager varManager;
     private Slider slider;
 
 	public void Setup (GameVariable thisGameVar) {
         gameVar = thisGameVar;
-        varManager = GameObject.Find("SCRIPTS").GetComponent<VariablesManager>();
         slider = GetComponentInChildren<Slider>();
         titleText.text = gameVar.name;
 	}
