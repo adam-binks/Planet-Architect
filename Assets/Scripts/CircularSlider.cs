@@ -12,13 +12,17 @@ public class CircularSlider : MonoBehaviour
     public Transform Origin; //center of rotation
     public Image ImageSelected; //drag here the image of type filled radial top
     public Text Angle; //value textual feedback
+    public VariableSlider varSlider;
 
-    public int Scale = 360; //value scale to use
+    public int scale = 360; //value scale to use
     public float lerpSpeed; // how quickly should the slider animate around to the current value?
+    public float targetValue;
+    public Color defaultSelectedColor;
+    public Color justClickedSelectedColor;
 
-    private float TargetValue;
     private int CurrentValue;
     public State CircularButtonState = State.NOT_DRAGGING;
+    private float lastTargetValue;
 
     public enum State
     {
@@ -28,8 +32,16 @@ public class CircularSlider : MonoBehaviour
 
     void Update()
     {
-        ImageSelected.fillAmount += (TargetValue - ImageSelected.fillAmount) * lerpSpeed * Time.deltaTime;
+        ImageSelected.fillAmount += (targetValue - ImageSelected.fillAmount) * lerpSpeed * Time.deltaTime;
         Angle.text = (Mathf.RoundToInt(ImageSelected.fillAmount * 100f)).ToString();
+
+        // check if slider value has changed - if so, update the variable
+        if (targetValue != lastTargetValue)
+        {
+            varSlider.UpdateVariable();
+        }
+
+        lastTargetValue = targetValue;
     }
 
     public void DragOnCircularArea(bool isClick)
@@ -72,15 +84,20 @@ public class CircularSlider : MonoBehaviour
 
         CurrentValue = detectedValue;
 
-        TargetValue = CurrentValue / 360f;
+        targetValue = CurrentValue / 360f;
     }
 
-    public void ClickEffects()
+    /// do a nice punch scale and colour fade effect when the thing is clicked/dragged
+    public void InteractEffects(bool wasClick)
     {
-        if (transform.localScale == Vector3.one)
+        if (wasClick && transform.localScale == Vector3.one)
         {
             transform.DOPunchScale(new Vector3(0.05f, 0.05f, 0.05f), 0.3f, 3);
         }
+
+        
+        ImageSelected.DOColor(justClickedSelectedColor, 0.05f).
+            OnComplete(() => { ImageSelected.DOColor(defaultSelectedColor, 0.25f); });
     }
 
 

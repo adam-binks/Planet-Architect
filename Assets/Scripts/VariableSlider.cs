@@ -7,11 +7,11 @@ public class VariableSlider : MonoBehaviour {
     public GameVariable gameVar;
     public Text titleText;
 
-    private Slider slider;
+    private CircularSlider slider;
 
 	public void Setup (GameVariable thisGameVar) {
         gameVar = thisGameVar;
-        slider = GetComponentInChildren<Slider>();
+        slider = GetComponentInChildren<CircularSlider>();
         titleText.text = gameVar.name;
 	}
 	
@@ -20,7 +20,7 @@ public class VariableSlider : MonoBehaviour {
     /// </summary>
 	public void UpdateVariable()
     {
-        gameVar.ChangeValue((int)slider.value, false);
+        gameVar.ChangeValue((int)slider.targetValue, false);
     }
 
     /// <summary>
@@ -28,6 +28,6 @@ public class VariableSlider : MonoBehaviour {
     /// </summary>
     public void UpdateSlider()
     {
-        slider.value = gameVar.value;
+        slider.targetValue = gameVar.value;
     }
 }
