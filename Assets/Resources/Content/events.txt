@@ -2,17 +2,13 @@
 	{
 		"name": "Land hydrate",
 		"description": "The seas flood, spreading nutrient rich biomass",
-		"interval": "200",
+		"interval": "-1",
 		"criteria": [
+			
 			{
-			"criteriaVariable": "Moon size",
-			"criteriaNumber": "80",
-			"criteriaType": "AtMost"
-			},
-			{
-			"criteriaVariable": "Oxygen content",
-			"criteriaNumber": "15",
-			"criteriaType": "AtLeast"
+				"criteriaVariable": "Year",
+				"criteriaNumber": "50",
+				"criteriaType": "AtMost"
 			}
 		],
 		"variableEffects": [

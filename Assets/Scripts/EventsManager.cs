@@ -17,16 +17,21 @@ public class PlanetEvent
 
     public bool CheckIfCriteriaFulfilled(Dictionary<string, GameVariable> variables)
     {
-        // check if event is still on cooldown
-        int currentYear = variables["year"].value;
-        if (interval > 0) // interval of 0 means no interval, interval of -1 means only fire once per game
+        // (1) check if event is still on cooldown
+        int currentYear = variables["Year"].value;
+        // interval of 0 means no interval, interval of -1 means only fire once per game
+        if (interval > 0)
         {
             if ((currentYear - lastFireYear) < interval) // event is still on cooldown
             {
                 return false;
             }
+        } else if (interval == -1 && lastFireYear != 0)  // if the event only fires once and has done already
+        {
+            return false;
         }
-        // check each variable based criteria for the event
+
+        // (2) check each variable based criteria for the event
         foreach(EventCriteria theCriteria in criteria)
         {
             if (!theCriteria.Check(variables))
@@ -34,8 +39,9 @@ public class PlanetEvent
                 return false; // if any one criteria has not been met, return false
             }
         }
+
         // all criteria are met: trigger the event
-        Debug.Log(string.Format("Event triggered: {0}", name));
+        Debug.Log(string.Format("Event triggered: {0}, time: {1}", name, variables["Year"].value));
         FireVariableEffects(variables);
         lastFireYear = currentYear; // start the cooldown "timer"
         return true;
@@ -131,7 +137,13 @@ public class EventsManager : MonoBehaviour {
         PlanetEvent newEvent = new PlanetEvent();
         newEvent.name = jsonEvent["name"].ToString();
         newEvent.description = jsonEvent["description"].ToString();
-        newEvent.interval = Convert.ToInt32(jsonEvent["interval"].ToString());
+        if (JsonImport.JsonDataContainsKey(jsonEvent, "interval"))
+        {
+            newEvent.interval = Convert.ToInt32(jsonEvent["interval"].ToString());
+        } else
+        {
+            newEvent.interval = 0;
+        }
 
         // generate EventCriteria objects
         newEvent.criteria = new EventCriteria[jsonEvent["criteria"].Count];
@@ -172,7 +184,8 @@ public class EventsManager : MonoBehaviour {
                 criteria.criteriaType = CriteriaType.Roughly;
                 break;
             default:
-                Debug.LogError(string.Format("Invalid criteriaType! Json data: {0}", jsonData));
+                Debug.LogError(string.Format("Invalid criteriaType {0}! Json data: {1}", 
+                                             criteria.criteriaType, jsonData));
                 break;
         }
 

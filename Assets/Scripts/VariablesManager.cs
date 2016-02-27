@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 /// <summary>
-/// GameVariables are parameters that trigger events
+/// GameVariables are parameters that trigger events. Parsed from variables.txt
 /// </summary>
 public class GameVariable
 {
@@ -12,6 +12,7 @@ public class GameVariable
     public string description;
     public int defaultValue;
     public int value;
+    public bool hasSlider;
     public VariablesManager varManager;
     public int maxAmount = 100;
 
@@ -19,7 +20,7 @@ public class GameVariable
     {
         value = Mathf.Clamp(newValue, 0, maxAmount); // most variables lie between 0 and 100 (except year)
 
-        if (shouldUpdateSlider) // the variable has been changed by something other than the slider
+        if (shouldUpdateSlider && hasSlider) // the variable has been changed by something other than the slider
         {
             varManager.sliders[name].UpdateSlider();
         }
@@ -38,7 +39,7 @@ public class VariablesManager : MonoBehaviour
     /// Add a new player controlled variable and create a slider for it
     /// </summary>
     /// <param name="jsonString">
-    /// Should have properties: "name", "description", "default"
+    /// Should have properties: "name", "description", "default", "hasSlider"
     /// </param>
     public void AddVariable(string jsonString, int variableNum, int numVariables)
     {
@@ -53,7 +54,10 @@ public class VariablesManager : MonoBehaviour
         newVar.varManager = this; // so the variable can modify sliders etc
         gameVars[newVar.name] = newVar;
 
-        AddSlider(newVar);
+        if (newVar.hasSlider)
+        {
+            AddSlider(newVar);
+        }
     }
 
     /// <summary>
