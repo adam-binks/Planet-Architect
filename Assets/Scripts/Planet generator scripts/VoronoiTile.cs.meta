@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 0aa1b37c72c6c3746a9b36c711f6bd87
+timeCreated: 1446375749
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - tileMat: {fileID: 2100000, guid: 272f8d89d7bfcfc40a47153f49d9e553, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
